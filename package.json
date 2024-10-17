@@ -1,0 +1,36 @@
+{
+  "name": "tar",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "cap:sync": "npx cap sync",
+    "cap:run:android": "npx cap run android",
+    "cap:build:android": "npx cap build android"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/node": "^8.0.0",
+    "@astrojs/react": "^3.6.2",
+    "@aws-sdk/client-s3": "^3.670.0",
+    "@aws-sdk/s3-request-presigner": "^3.670.0",
+    "@libsql/client": "^0.14.0",
+    "@material-icons/svg": "^1.0.33",
+    "astro": "^4.15.11",
+    "astro-icon": "^1.1.1",
+    "dotenv": "^16.4.5",
+    "react": "^18.2.0",
+    "react-select": "^5.7.3",
+    "typescript": "^5.6.2"
+  },
+  "devDependencies": {
+    "@astrojs/tailwind": "^5.1.2",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13"
+  }
+}

@@ -1,0 +1,78 @@
+---
+import { ViewTransitions } from 'astro:transitions';
+import Layout from '../layouts/Layout.astro';
+import Menu from './Menu.astro';
+import Home from './pages/Home.astro';
+import Orai from './pages/Orai.astro';
+import A from './pages/A.astro';
+import Pin from './pages/Pin.astro';
+import Reports from './pages/Reports.astro';
+import Files from './pages/Files.astro';
+import Posts from './pages/Posts.astro';
+import Pathai from './pages/Pathai.astro';
+import Settings from './pages/Settings.astro';
+import Links from './pages/Links.astro';
+import Instances from '../pages/pin/instances.astro';
+import Prod from '../pages/pin/prod.astro';
+
+const pathname = new URL(Astro.request.url).pathname;
+---
+
+<Layout title="Tar SPA">
+  <ViewTransitions />
+  <div class="flex flex-col md:flex-row h-screen bg-white">
+    <Menu />
+    <main class="flex-1 overflow-y-auto p-4 w-full bg-white">
+      {pathname === '/' && <Home />}
+      {pathname === '/orai' && <Orai />}
+      {pathname === '/a' && <A />}
+      {pathname === '/pin' && <Pin />}
+      {pathname === '/reports' && <Reports />}
+      {pathname === '/files' && <Files />}
+      {pathname === '/posts' && <Posts />}
+      {pathname === '/pathai' && <Pathai />}
+      {pathname === '/settings' && <Settings />}
+      {pathname === '/links' && <Links />}
+      {pathname === '/pin/instances' && <Instances />}
+      {pathname === '/pin/prod' && <Prod />}
+    </main>
+  </div>
+</Layout>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const links = document.querySelectorAll('a[href^="/"]');
+    links.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const href = link.getAttribute('href');
+        if (href) {
+          window.history.pushState({}, '', href);
+          updateContent(href);
+        }
+      });
+    });
+  });
+
+  window.addEventListener('popstate', () => {
+    updateContent(window.location.pathname);
+  });
+
+  function updateContent(pathname: string) {
+    const main = document.querySelector('main');
+    if (main) {
+      main.innerHTML = '<div class="flex justify-center items-center h-full"><div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div></div>';
+      
+      fetch(pathname)
+        .then(response => response.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newContent = doc.querySelector('main')?.innerHTML;
+          if (newContent) {
+            main.innerHTML = newContent;
+          }
+        });
+    }
+  }
+</script>

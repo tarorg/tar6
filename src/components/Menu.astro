@@ -1,0 +1,101 @@
+---
+// Import the SVG icons
+import TriangleIcon from '../assets/triangle-icon.svg?raw';
+import SquareIcon from '../assets/square-icon.svg?raw';
+import CircleIcon from '../assets/circle-icon.svg?raw';
+
+const menuItems = [
+  { name: "Tar", path: "/" },
+  { name: "Pin", path: "/pin" },
+  { name: "Reports", path: "/reports" },
+  { name: "Files", path: "/files" },
+  { name: "Posts", path: "/posts" },
+  { name: "Pathai", path: "/pathai" },
+  { name: "Settings", path: "/settings" },
+  { name: "Links", path: "/links" }
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<nav class="bg-white border-b border-gray-200 w-full">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16">
+      <div class="flex">
+        <div class="flex-shrink-0 flex items-center">
+          <button id="menuToggle" class="text-gray-800 hover:text-gray-600 text-lg font-semibold">
+            Menu
+          </button>
+        </div>
+      </div>
+      <div class="flex items-center">
+        <a href="/orai" class="text-gray-600 hover:text-gray-800 px-3 py-2" aria-label="Orai">
+          <span class="w-6 h-6 block" set:html={TriangleIcon} />
+        </a>
+        <a href="/" class="text-gray-600 hover:text-gray-800 px-3 py-2" aria-label="Tar AI">
+          <span class="w-6 h-6 block" set:html={SquareIcon} />
+        </a>
+        <a href="/a" class="text-gray-600 hover:text-gray-800 px-3 py-2" aria-label="A">
+          <span class="w-6 h-6 block" set:html={CircleIcon} />
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <div id="menuContent" class="hidden bg-white border-t border-gray-200 fixed left-0 right-0 top-16 bottom-0 z-10 overflow-y-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+      <ul class="divide-y divide-gray-200">
+        {menuItems.map((item) => (
+          <li>
+            <a href={item.path} class={`block px-4 py-4 text-gray-800 hover:bg-gray-50 text-lg font-medium ${currentPath === item.path ? 'bg-gray-100' : ''}`}>
+              {item.name}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<style>
+  /* Ensure SVG icons are visible */
+  .w-6.h-6 svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
+</style>
+
+<script>
+  const menuToggle = document.getElementById('menuToggle');
+  const menuContent = document.getElementById('menuContent');
+
+  if (menuToggle && menuContent) {
+    menuToggle.addEventListener('click', () => {
+      menuContent.classList.toggle('hidden');
+    });
+
+    // Close menu when clicking outside, but not when clicking inside the menu
+    document.addEventListener('click', (e) => {
+      const target = e.target as Node;
+      const isClickInsideMenu = menuContent.contains(target) || menuToggle.contains(target);
+      if (!isClickInsideMenu && !menuContent.classList.contains('hidden')) {
+        menuContent.classList.add('hidden');
+      }
+    });
+
+    // Close menu when a menu item is clicked
+    menuContent.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        menuContent.classList.add('hidden');
+      });
+    });
+
+    // Prevent menu from closing when clicking inside (except on links)
+    menuContent.addEventListener('click', (e) => {
+      if (!(e.target as HTMLElement).closest('a')) {
+        e.stopPropagation();
+      }
+    });
+  }
+</script>
