@@ -131,10 +131,6 @@ import '../../styles/global.css';
         </div>
     </div>
 
-    <!-- Add Editor.js and its plugins -->
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script>
 
     <!-- Update this HTML for the media bottom sheet just before the closing </body> tag -->
     <div id="mediaBottomSheet" class="fixed inset-x-0 bottom-0 bg-white shadow-md rounded-t-xl transform translate-y-full transition-transform duration-300 ease-in-out z-50">
@@ -158,10 +154,10 @@ import '../../styles/global.css';
         <path id="loadingArc" d="M16 2 A14 14 0 0 1 30 16" fill="none" stroke="#9CA3AF" stroke-width="4" stroke-linecap="round" />
     </svg>
 
-    <script define:vars={{ attributes }}>
-        function setupDropdown(inputSelector, dropdownSelector, optionsSelector) {
+    <script is:inline define:vars={{ attributes }}>
+        function setupDropdown(inputSelector, _dropdownSelector, optionsSelector) {
             const input = document.querySelector(inputSelector);
-            const dropdown = document.querySelector(dropdownSelector);
+            const dropdown = document.querySelector(_dropdownSelector);
             const options = dropdown.querySelectorAll(optionsSelector);
             const wrapper = input.closest('.category-wrapper');
 
@@ -204,7 +200,7 @@ import '../../styles/global.css';
         // Setup Collection dropdown
         setupDropdown('.category-wrapper input', '.category-dropdown', '.category-dropdown div');
 
-        const coreTable = document.getElementById('coreTable');
+        const _coreTable = document.getElementById('coreTable');
 
         // Name field character limit and page title update
         const nameCell = document.querySelector('[data-max-length]');
@@ -520,6 +516,13 @@ import '../../styles/global.css';
             if (editor) {
                 editor.destroy();
             }
+
+            // @ts-ignore
+            const EditorJS = window.EditorJS;
+            // @ts-ignore
+            const Header = window.Header;
+            // @ts-ignore
+            const List = window.List;
 
             editor = new EditorJS({
                 holder: 'editorjs',

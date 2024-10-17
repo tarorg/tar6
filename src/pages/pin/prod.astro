@@ -132,11 +132,6 @@ import '../../styles/global.css';
         </div>
     </div>
 
-    <!-- Add Editor.js and its plugins -->
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script>
-
     <!-- Update this HTML for the media bottom sheet just before the closing </body> tag -->
     <div id="mediaBottomSheet" class="fixed inset-x-0 bottom-0 bg-white shadow-md rounded-t-xl transform translate-y-full transition-transform duration-300 ease-in-out z-50">
         <div class="p-6">
@@ -159,12 +154,12 @@ import '../../styles/global.css';
         <path id="loadingArc" d="M16 2 A14 14 0 0 1 30 16" fill="none" stroke="#9CA3AF" stroke-width="4" stroke-linecap="round" />
     </svg>
 
-    <script define:vars={{ attributes }}>
-        function setupDropdown(inputSelector, dropdownSelector, optionsSelector) {
+    <script is:inline define:vars={{ attributes }}>
+        function setupDropdown(inputSelector, _dropdownSelector, optionsSelector) {
             const inputs = document.querySelectorAll(inputSelector);
             const selectedAttributes = new Set();
 
-            inputs.forEach((input, index) => {
+            inputs.forEach((input) => {
                 const dropdown = input.nextElementSibling;
                 const options = dropdown.querySelectorAll(optionsSelector);
                 const wrapper = input.closest('.category-wrapper, .type-wrapper');
@@ -242,7 +237,8 @@ import '../../styles/global.css';
         // Setup Type dropdown
         setupDropdown('.type-input', '.type-dropdown', '.type-dropdown div');
 
-        const coreTable = document.getElementById('coreTable');
+        const _coreTable = document.getElementById('coreTable');
+        const _optionsSelectorCell = document.getElementById('optionsSelectorCell');
 
         // Name field character limit and page title update
         const nameCell = document.querySelector('[data-max-length]');
@@ -754,10 +750,15 @@ import '../../styles/global.css';
         // Add these new variables and functions for Editor.js
         let editor;
 
-        function initializeEditor() {
+        async function initializeEditor() {
             if (editor) {
+                await editor.isReady;
                 editor.destroy();
             }
+
+            const EditorJS = (await import('@editorjs/editorjs')).default;
+            const Header = (await import('@editorjs/header')).default;
+            const List = (await import('@editorjs/list')).default;
 
             editor = new EditorJS({
                 holder: 'editorjs',
@@ -774,6 +775,8 @@ import '../../styles/global.css';
                 data: {}, // You can load saved data here
                 placeholder: 'Enter your notes here...'
             });
+
+            await editor.isReady;
         }
 
         // Add a function to save the editor content
@@ -952,343 +955,16 @@ import '../../styles/global.css';
                 // Add your OK logic here
             });
         });
+
+        // @ts-ignore
+        const EditorJS = window.EditorJS;
     </script>
 
     <style>
-        .media-cell {
-            min-height: 40px; /* Adjust as needed */
-        }
-        .media-preview {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-        }
-        .media-item {
-            width: 32px;
-            height: 32px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            background-color: #f3f4f6; /* Light gray background for non-image files */
-        }
-        .media-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        /* Remove the default focus outline for all cells */
-        td:focus {
-            outline: none;
-        }
-        /* Add a subtle background color change on hover for all rows */
-        tr:hover td {
-            background-color: #f9fafb;
-        }
-        .type-select {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background-image: none;
-        }
-
-        .type-select::-ms-expand {
-            display: none;
-        }
-
-        /* Hide the arrow in WebKit browsers */
-        .type-select::-webkit-select-placeholder {
-            color: transparent;
-        }
-
-        /* Hide the arrow in Firefox */
-        .type-select:-moz-focusring {
-            color: transparent;
-            text-shadow: 0 0 0 #000;
-        }
-
-        /* Style for the placeholder option */
-        .type-select option[value=""] {
-            color: #9CA3AF;
-        }
-
-        /* Style for other options */
-        .type-select option:not([value=""]) {
-            color: #374151;
-        }
-
-        /* Add these new styles */
-        .category-wrapper,
-        .type-wrapper {
-            position: relative;
-        }
-
-        .category-dropdown,
-        .type-dropdown {
-            position: fixed;
-            width: 100%;
-            left: 0;
-            z-index: 1000;
-        }
-
-        /* Bottom Sheet Styles */
-        #bottomSheet {
-            max-height: 80vh;
-        }
-
-        .bottom-sheet-item {
-            transition: background-color 0.2s;
-        }
-
-        .bottom-sheet-item:active {
-            background-color: #e5e7eb;
-        }
-
-        .bottom-sheet-item.selected {
-            background-color: #93c5fd;
-        }
-
-        #typeSelector {
-            transition: none; /* Remove the transition */
-        }
-
-        #typeSelectorCell:hover #typeSelector {
-            color: inherit; /* Use the default text color on hover */
-        }
-
-        #optionsSelector {
-            transition: none;
-        }
-
-        #optionsSelectorCell:hover #optionsSelector {
-            color: inherit;
-        }
-
-        #closeBottomSheet {
-            transition: color 0.2s;
-        }
-
-        #closeBottomSheet:hover {
-            color: #4B5563; /* A slightly darker gray on hover */
-        }
-
-        #bottomSheetSearch {
-            flex-grow: 1;
-            min-width: 0; /* This allows the input to shrink if needed */
-        }
-
-        #closeBottomSheet {
-            flex-shrink: 0;
-        }
-
-        #optionsSelectorCell {
-            user-select: none; /* Prevent text selection */
-        }
-
-        #optionsDecrease, #optionsIncrease {
-            cursor: pointer;
-        }
-
-        #optionsSelector {
-            pointer-events: none; /* Allows clicks to pass through to the underlying divs */
-        }
-
-        /* Hide table header */
-        #coreTable thead {
-            display: none;
-        }
-
-        /* Style for the page title */
-        #pageTitle {
-            transition: opacity 0.3s ease;
-        }
-
-        #confirmationDialog {
-            max-height: 80vh;
-        }
-
-        /* Add this new style for the property column */
-        #coreTable td:first-child {
-            width: 25%;
-        }
-
-        /* Add styles for the icons */
-        .bg-gray-100 svg {
-            transition: color 0.2s ease-in-out;
-        }
-
-        /* Add these new styles */
-        #editIcon, #notesIcon {
-            transition: color 0.2s ease-in-out;
-        }
-
-        #corebox, #notesContainer {
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        /* Add or modify these styles */
-        #notesContainer {
-            height: calc(100vh - 120px); /* Adjust this value as needed */
-        }
-
-        #notesTextarea {
-            border: none;
-            background-color: transparent;
-        }
-
-        /* Add these new styles for Editor.js */
-        #editorjs {
-            height: 100%;
-        }
-
-        .codex-editor__redactor {
-            padding-bottom: 100px !important;
-        }
-
-        /* Add these new styles for the corebox */
-        #corebox {
-            width: 100%;
-            margin-left: 0;
-            margin-right: 0;
-            background-color: white;
-        }
-
-        #coreTable {
-            width: 100%;
-        }
-
-        #coreTable td {
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-
-        body {
-            background-color: white;
-        }
-
-        #corebox, #notesContainer {
-            width: 100%;
-            background-color: white;
-            margin-top: 1rem;
-        }
-
-        #coreTable {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-
-        #coreTable td {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        #coreTable tr:last-child td {
-            border-bottom: none;
-        }
-
-        .media-item {
-            width: 32px;
-            height: 32px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            background-color: #f3f4f6;
-            margin: 2px;
-            border-radius: 4px;
-        }
-
-        .media-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .media-preview {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2px;
-            max-height: 40px; /* Reduced height */
-            overflow-y: auto;
-        }
-
-        .media-cell {
-            height: 44px; /* Slightly larger than max-height of media-preview to account for padding */
-            padding: 2px;
-        }
-
-        .media-item span {
-            font-size: 16px; /* Smaller icon size for non-image files */
-        }
-
-        /* Add these new styles for the instances table */
-        #instancesTableBody td {
-            vertical-align: top;
-        }
-
-        #instancesTableBody input[type="text"],
-        #instancesTableBody input[type="number"] {
-            background-color: transparent;
-        }
-
-        #instancesTableBody input[type="text"]::placeholder {
-            color: #9CA3AF;
-        }
-
-        /* Ensure the table respects the column widths */
-        #instancesTableBody table {
-            table-layout: fixed;
-        }
-
-        #instancesTableBody th,
-        #instancesTableBody td {
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* Add a vertical divider between columns */
-        #instancesTableBody th:first-child,
-        #instancesTableBody td:first-child {
-            border-right: 1px solid #e5e7eb;
-        }
-
-        #instanceSearch {
-            transition: all 0.3s ease;
-        }
-
-        #instanceSearch:focus {
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-        }
-
-        #mediaBottomSheet {
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        #mediaBottomSheetContent {
-            max-height: calc(90vh - 8rem);
-            overflow-y: auto;
-        }
-
-        .media-cell {
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        .media-cell:hover {
-            background-color: #f3f4f6;
-        }
-
-        .media-preview {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            min-height: 40px;
-        }
-
-        /* Add these new styles */
         @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
             100% {
                 transform: rotate(360deg);
             }
@@ -1297,38 +973,32 @@ import '../../styles/global.css';
         @keyframes arcRotate {
             0% {
                 stroke-dasharray: 0 87.96;
-                stroke-dashoffset: 0;
             }
             50% {
                 stroke-dasharray: 54.97 87.96;
-                stroke-dashoffset: -21.99;
             }
             100% {
                 stroke-dasharray: 87.96 87.96;
-                stroke-dashoffset: -87.96;
             }
         }
 
-        .rotating-circle {
+        .loader {
             animation: rotate 1.5s linear infinite;
         }
 
-        .rotating-circle #loadingArc {
+        .loader-path {
             animation: arcRotate 1.5s ease-in-out infinite;
         }
 
-        /* Ensure the SVG takes up the full space of its container */
-        .rotating-circle svg {
+        .custom-button {
             width: 100%;
-            height: 100%;
         }
 
-        /* Add these new styles */
-        #cancelButton, #okButton {
+        .custom-button:hover {
             transition: background-color 0.2s ease;
         }
 
-        #cancelButton:hover, #okButton:hover {
+        .custom-button:hover {
             background-color: #e5e7eb;
         }
     </style>

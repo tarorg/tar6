@@ -1,0 +1,8 @@
+{
+  "appId": "space.tarai.app",
+  "appName": "tar",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}
